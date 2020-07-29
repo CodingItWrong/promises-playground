@@ -36,4 +36,19 @@ describe('store', () => {
       expect(store.getState().weebles).toEqual(weebles);
     });
   });
+
+  describe('getAll', () => {
+    it('loads both widgets and weebles', async () => {
+      const widgets = [1, 2, 3];
+      const weebles = [4, 5, 6];
+      const api = {
+        getWidgets: jest.fn().mockName('getWidgets').mockResolvedValue(widgets),
+        getWeebles: jest.fn().mockName('getWeebles').mockResolvedValue(weebles),
+      };
+      const store = createStore(api);
+      await store.loadAll();
+      expect(store.getState().widgets).toEqual(widgets);
+      expect(store.getState().weebles).toEqual(weebles);
+    });
+  });
 });

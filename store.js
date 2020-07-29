@@ -20,10 +20,16 @@ export const createStore = api => {
     runOnNextTick(api.getWeebles).then(weebles => {
       state.weebles = weebles;
     });
+  const loadAll = () =>
+    loadWidgets().then(() => {
+      // loadWeebles();
+      return loadWeebles();
+    });
 
   return {
     getState,
     loadWidgets,
     loadWeebles,
+    loadAll,
   };
 };
