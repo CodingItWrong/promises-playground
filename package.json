@@ -5,7 +5,7 @@
   "author": "Josh Justice <me@codingitwrong.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "test": "jest --watch"
   },
   "devDependencies": {
@@ -17,6 +17,7 @@
     "eslint-plugin-jest": "^23.19.0",
     "eslint-plugin-prettier": "^3.1.4",
     "jest": "^26.1.0",
+    "nodemon": "^2.0.4",
     "prettier": "^2.0.5"
   }
 }
