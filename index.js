@@ -15,12 +15,18 @@ const getWeebles = () => Promise.resolve(['Weeble A', 'Weeble B']);
 //     console.log(result);
 //   });
 
-getWidgets()
-  .then(widgets => {
-    return getWeebles().then(weebles => {
-      return { widgets, weebles };
-    });
-  })
-  .then(result => {
-    console.log(result);
-  });
+// getWidgets().then(widgets => {
+//   getWeebles().then(weebles => {
+//     console.log({ widgets, weebles });
+//   });
+// });
+
+// getWidgets()
+//   .then(widgets => {
+//     return getWeebles().then(weebles => {
+//       return { widgets, weebles };
+//     });
+//   })
+//   .then(result => {
+//     console.log(result);
+//   });
