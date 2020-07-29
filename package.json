@@ -2,9 +2,16 @@
   "name": "promises-playground",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Josh Justice <josh.justice@accesscfa.com>",
+  "author": "Josh Justice <me@codingitwrong.com>",
   "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest --watch"
+  },
   "devDependencies": {
+    "@babel/preset-env": "^7.10.4",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^26.1.0",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-jest": "^23.19.0",
