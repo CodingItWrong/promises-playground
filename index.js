@@ -1,6 +1,4 @@
-const getRestaurant = () => Promise.resolve('Sushi Place');
-const getDish = () => Promise.resolve('Rainbow Roll');
-const getError = () => Promise.reject('an error');
+const { getRestaurant, getDish, getError } = require('./api');
 
 const restaurantPromise = getRestaurant();
 console.log({ restaurantPromise });
