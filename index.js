@@ -1,122 +1,124 @@
-const { getRestaurant, getDish, getError } = require('./api');
+// Say we have a set of functions that make calls to a web service and return the data via Promises.
+const { getRestaurant, getSpecialDish, getError } = require('./api');
 
+// The return value of the functions is a Promise object. We can't get access to its value yet, because it's still pending.
 const restaurantPromise = getRestaurant();
-console.log({ restaurantPromise });
+console.log(0, restaurantPromise); // Promise { <pending> }
 
-// A promise that resolves, passes the resolved value to the .then() callback
+// To get access to its value when it *is* available, we call `.then()` and pass a callback function to it. The callback function receives the value as its argument.
 restaurantPromise.then(resolvedValue => {
-  console.log(1, resolvedValue);
+  console.log(1, resolvedValue); // Sushi Place
 });
 
-// If you return a value from a `.then()` callback (phrasing), the overall promise resolves to that
-restaurantPromise
-  .then(() => {
-    return 'Pizza Place';
+// The returned value of `.then()` is another Promise.
+const anotherPromise = getRestaurant().then(() => {
+  /*...*/
+});
+console.log('C', anotherPromise); // Promise { <pending> }
+
+// If you return a value from a `.then()` callback, its returned Promise resolves to that value.
+getRestaurant()
+  .then(restaurant => {
+    return `The Best ${restaurant}`;
   })
   .then(resolvedValue => {
-    console.log(2, resolvedValue);
+    console.log(2, resolvedValue); // The Best Sushi Place
   });
 
-// if you return another promise that resolves, the overall promise resolves to that
-restaurantPromise
+// If within a `.then()` callback you return another Promise that resolves, the outer Promise resolves to the inner Promise's resolved value.
+getRestaurant()
   .then(() => {
     return Promise.resolve('Pizza Place');
   })
   .then(resolvedValue => {
-    console.log('A', resolvedValue);
+    console.log('A', resolvedValue); // Pizza Place
   });
 
-// The above isn't useful, but what *is* useful is returning another promise created by elsewhere
-getRestaurant()
-  .then(() => {
-    return getDish();
-  })
-  .then(resolvedValue => {
-    console.log(3, resolvedValue);
-  });
-
-// you have to return that promise; just kicking it off doesn't work
-getRestaurant()
-  .then(() => {
-    getDish();
-  })
-  .then(resolvedValue => {
-    console.log(4, resolvedValue);
-  });
-
-// if it's just one quick call you can use the expression form of arrow functions to return the value (CONSIDER TEACHING ARROW FUNCTIONS ABOVE)
-getRestaurant()
-  .then(() => getDish())
-  .then(resolvedValue => {
-    console.log(5, resolvedValue);
-  });
-
-// (maybe less important to teach) if you need the values from both functions, you can chain a .then() inside, that way it has both resolved value variables in scope
+// The above isn't usually that useful, but what *is* useful is returning a promise created by another function.
 getRestaurant()
   .then(restaurant => {
-    return getDish().then(dish => {
+    return getSpecialDish(restaurant);
+  })
+  .then(resolvedValue => {
+    console.log(3, resolvedValue); // Sushi Place Special Roll
+  });
+
+// You have to make sure to return that Promise as the return value of the function, though. Just creating it doesn't work.
+getRestaurant()
+  .then(restaurant => {
+    getSpecialDish(restaurant);
+  })
+  .then(resolvedValue => {
+    console.log(4, resolvedValue); // undefined
+  });
+
+// TDOO talk about timing here?
+
+// If you need to get access to the resolved values of two Promises you call in sequence, you can chain a `.then()` on the second promise inside the first Promise's `.then()`. That way both resolved values are in scope.
+getRestaurant()
+  .then(restaurant => {
+    return getSpecialDish(restaurant).then(dish => {
       return { restaurant, dish };
     });
   })
   .then(resolvedValue => {
-    console.log(6, resolvedValue);
+    console.log(6, resolvedValue); // { restaurant: 'Sushi Place', dish: 'Sushi Place Special Roll' }
   });
 
-// if a promise rejects, the `.catch()` callback gets the error; a `.then()` is skipped
+// Promises report errors (called rejections) to a `.catch()` callback function. Any `.then()` callbacks are skipped.
 getError()
   .then(resolvedValue => {
-    console.log(7, resolvedValue);
+    console.log(7, resolvedValue); // not called
   })
   .catch(error => {
-    console.error(8, error);
+    console.error(8, error); // Something went wrong
   });
 
-// if you catch an error, by default the promise resolves
+// Like `.then()`, `.catch()` returns a new Promise. If an error is caught, the Promise returned by `.catch()` resolves; it doesn't reject. This may be surprising.
 getError()
   .catch(error => {
-    console.error(9, error);
+    /* ... */
   })
   .then(resolvedValue => {
-    console.log(10, resolvedValue);
+    console.log(10, resolvedValue); // undefined
   });
 
-// this means if you want to catch an error and pass along a fix value, you can just return it. (returning Promise.resolve() is unnecessary as we saw before)
+// This is useful for when you want to handle an error and pass along a value to "get things working again". You can just return a value you want the Promise to resolve to. As we saw before, returning Promise.resolve() is unnecessary; you can return the value directly.
 getError()
   .catch(error => {
-    console.error(11, error);
     return 'fix';
   })
   .then(resolvedValue => {
-    console.log(12, resolvedValue);
+    console.log(12, resolvedValue); // fix
   });
 
-// TODO: need to put these in separate files to visualize it. But use with "production code", not tests
-
-// if you want to operate on an error and then pass it along, you can return a rejected promise
+// If you want to do something in response to an error but then pass it along, you can return a rejected Promise. This is useful if another part of your app also needs to know about the error.
 getError()
   .catch(error => {
-    console.error(13, error);
+    console.error(13, error); // Something went wrong
     return Promise.reject(error);
   })
   .catch(error => {
-    console.error(14, error);
+    console.error(14, error); // Something went wrong
+  });
+
+// Alternatively, you can use the `throw` keyword to throw the error.
+getError()
+  .catch(error => {
+    console.error(15, error); // Something went wrong
+    throw error;
+  })
+  .catch(error => {
+    console.error(16, error); // Something went wrong
   });
 
 // this also works inside a `.then()` block
 getRestaurant()
   .then(() => {
-    return Promise.reject('actually an error');
+    throw 'actually an error';
   })
   .catch(error => {
-    console.error('B', error);
+    console.error('B', error); // actually an error
   });
 
-// you can also `throw` instead of returning the rejected promise
-getError()
-  .catch(error => {
-    console.error(15, error);
-    throw error;
-  })
-  .catch(error => {
-    console.error(16, error);
-  });
+// So the rule is the same for both `.then()` and `.catch()`: they both return a Promise that resolves by default, and only rejects if you `throw` or return a rejected promise.
